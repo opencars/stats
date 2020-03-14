@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/shal/statsd/pkg/model"
 	"log"
 	"os"
 
+	"github.com/shal/statsd/pkg/model"
+	"github.com/shal/statsd/pkg/store/sqlstore"
+
+	"github.com/shal/statsd/pkg/eventapi"
+
 	"github.com/nats-io/nats.go"
-	"github.com/shal/statsd/internal/config"
+	"github.com/shal/statsd/pkg/config"
 )
 
 func main() {
@@ -30,6 +34,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	store, err := sqlstore.New(&conf.DB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	conn, err := nats.Connect(conf.EventAPI.Address())
 	if err != nil {
 		log.Fatal(err)
@@ -43,11 +52,25 @@ func main() {
 
 	fmt.Println("Listening...")
 	for event := range events {
-		var tmp model.Event
+		var tmp eventapi.Event
 		if err := json.Unmarshal(event.Data, &tmp); err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println(tmp)
+		if tmp.Kind == eventapi.EventAuthorizationKind {
+			var auth model.Authorization
+
+			if err := json.Unmarshal(tmp.Data, &auth); err != nil {
+				log.Fatal(err)
+			}
+
+			if err := store.Authorization().Create(&auth); err != nil {
+				log.Fatal(err)
+			}
+
+			continue
+		}
+
+		log.Printf("[WARNING] %v\n", tmp)
 	}
 }

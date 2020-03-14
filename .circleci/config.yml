@@ -37,13 +37,13 @@ jobs:
             done
             echo Failed waiting for Postgres && exit 1
 
-      # - run:
-      #     name: "Run migrations"
-      #     environment:
-      #       GO111MODULE: "off"
-      #     command: |
-      #       go get -tags 'postgres' -u github.com/golang-migrate/migrate/cmd/migrate
-      #       migrate -source file://migrations -database postgres://postgres:@localhost:5432/stats_test\?sslmode=disable up
+      - run:
+          name: "Run migrations"
+          environment:
+            GO111MODULE: "off"
+          command: |
+            go get -tags 'postgres' -u github.com/golang-migrate/migrate/cmd/migrate
+            migrate -source file://migrations -database postgres://postgres:@localhost:5432/stats_test\?sslmode=disable up
 
       - run:
           name: "Run Tests"
