@@ -5,7 +5,7 @@ CREATE TABLE authorizations (
     "enabled"    BOOLEAN   NOT NULL,
     "token"      TEXT      NOT NULL,
     "error"      TEXT,
-    "ip"         INET      NOT NULL,
+    "ip"         TEXT      NOT NULL,
     "name"       TEXT      NOT NULL,
     "status"     AUTH_T    NOT NULL,
     "timestamp"  TIMESTAMP NOT NULL,
