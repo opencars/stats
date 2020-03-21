@@ -14,7 +14,8 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /go/bin/statsd ./cmd/statsd/main.go
+RUN go build -o /go/bin/statsd ./cmd/statsd/main.go && \
+    go build -o /go/bin/server ./cmd/server/main.go
 
 FROM alpine
 

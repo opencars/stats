@@ -1,6 +1,10 @@
 package sqlstore
 
 import (
+	"context"
+	"database/sql"
+	"time"
+
 	"github.com/shal/statsd/pkg/model"
 )
 
@@ -16,7 +20,7 @@ func (r *AuthRepository) Create(auth *model.Authorization) error {
 			$1, $2, $3, $4, $5, $6, $7
 		) RETURNING id, created_at`,
 		auth.Enabled, auth.Token, auth.Error,
-		auth.IP, auth.Name, auth.Status, auth.Time,
+		auth.IP, auth.Name, auth.Status, auth.Time.UTC(),
 	)
 
 	if err := row.Scan(&auth.ID, &auth.CreatedAt); err != nil {
@@ -31,8 +35,8 @@ func (r *AuthRepository) FindByID(id int64) (*model.Authorization, error) {
 
 	err := r.store.db.Get(&auth,
 		`SELECT id, enabled, token, error, ip, name, status, timestamp, created_at
-	   FROM authorizations
-	   WHERE id = $1`,
+		FROM authorizations
+		WHERE id = $1`,
 		id,
 	)
 
@@ -41,4 +45,86 @@ func (r *AuthRepository) FindByID(id int64) (*model.Authorization, error) {
 	}
 
 	return &auth, nil
+}
+
+func (r *AuthRepository) StatsForPeriod(from, to time.Time) ([]model.AuthStat, error) {
+	stats := make([]model.AuthStat, 0)
+
+	err := r.store.db.Select(&stats,
+		`SELECT token, name, count(*) as amount 
+		FROM authorizations 
+		WHERE extract(epoch from timestamp) >= $1 AND
+			  extract(epoch from timestamp) <= $2 AND 
+			  token is not NULL
+		GROUP BY token, name
+		ORDER BY count(*) DESC`,
+		from.UTC().Unix(), to.UTC().Unix(),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return stats, nil
+}
+
+func (r *AuthRepository) StatsByToken(token string) (*model.TokenStat, error) {
+	var stat model.TokenStat
+
+	tx, err := r.store.db.BeginTxx(context.Background(), &sql.TxOptions{ReadOnly: false})
+	if err != nil {
+		return nil, err
+	}
+
+	err = tx.Get(&stat,
+		`SELECT count(*) as failed FROM authorizations 
+		WHERE token = $1 AND status = 'failed'`,
+		token,
+	)
+
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Get(&stat,
+		`SELECT count(*) as succeed FROM authorizations
+		WHERE token = $1 AND status = 'succeed'`,
+		token,
+	)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Get(&stat,
+		`SELECT count(*) as total FROM authorizations
+		WHERE token = $1`,
+		token,
+	)
+
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	stat.IPs = make([]model.StatsByIp, 0)
+	err = tx.Select(&stat.IPs,
+		`SELECT ip, count(*) as total FROM authorizations
+		WHERE token = $1
+		GROUP BY ip
+		ORDER BY count(*) DESC`,
+		token,
+	)
+
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return &stat, nil
 }

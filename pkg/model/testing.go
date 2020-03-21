@@ -17,6 +17,6 @@ func TestAuthorization(t *testing.T) *Authorization {
 		Status:  "succeed",
 		Error:   nil,
 		IP:      "127.0.0.1",
-		Time:    time.Now(),
+		Time:    time.Now().UTC(),
 	}
 }
