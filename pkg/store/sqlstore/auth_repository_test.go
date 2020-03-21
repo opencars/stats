@@ -1,10 +1,12 @@
 package sqlstore_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/shal/statsd/pkg/model"
 	"github.com/shal/statsd/pkg/store/sqlstore"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestAuthRepository_Create(t *testing.T) {
@@ -29,4 +31,52 @@ func TestAuthRepository_FindByID(t *testing.T) {
 	actual, err := s.Authorization().FindByID(auth.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, actual)
+}
+
+func TestAuthRepository_StatsForPeriod(t *testing.T) {
+	s, teardown := sqlstore.TestDB(t, conf)
+	defer teardown("authorizations")
+
+	auth := model.TestAuthorization(t)
+	assert.NoError(t, s.Authorization().Create(auth))
+	assert.NotNil(t, auth)
+	assert.EqualValues(t, 1, auth.ID)
+
+	assert.NoError(t, s.Authorization().Create(auth))
+	assert.NotNil(t, auth)
+	assert.EqualValues(t, 2, auth.ID)
+
+	actual, err := s.Authorization().StatsForPeriod(
+		auth.Time.Add(-time.Second), auth.Time.Add(time.Second),
+	)
+	assert.NoError(t, err)
+	assert.Len(t, actual, 1)
+}
+
+func TestAuthRepository_StatsByToken(t *testing.T) {
+	s, teardown := sqlstore.TestDB(t, conf)
+	defer teardown("authorizations")
+
+	auth1 := model.TestAuthorization(t)
+	assert.NoError(t, s.Authorization().Create(auth1))
+	assert.NotNil(t, auth1)
+	assert.EqualValues(t, 1, auth1.ID)
+
+	auth2 := model.TestAuthorization(t)
+	auth2.IP = "127.0.0.2"
+	assert.NoError(t, s.Authorization().Create(auth2))
+	assert.NotNil(t, auth2)
+	assert.EqualValues(t, 2, auth2.ID)
+
+	actual, err := s.Authorization().StatsByToken(auth1.Token)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, actual.Succeed)
+	assert.EqualValues(t, 2, actual.Total)
+	assert.EqualValues(t, 0, actual.Failed)
+
+	assert.Len(t, actual.IPs, 2)
+	assert.Equal(t, actual.IPs[0].IP, auth1.IP)
+	assert.EqualValues(t, actual.IPs[0].Total, 1)
+	assert.Equal(t, actual.IPs[1].IP, auth2.IP)
+	assert.EqualValues(t, actual.IPs[1].Total, 1)
 }

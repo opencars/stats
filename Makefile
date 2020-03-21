@@ -1,5 +1,5 @@
 .PHONY: default all clean
-APPS     := statsd
+APPS     := statsd server
 BLDDIR   := bin
 VERSION  := $(shell cat VERSION)
 
