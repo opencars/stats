@@ -73,10 +73,4 @@ func TestAuthRepository_StatsByToken(t *testing.T) {
 	assert.EqualValues(t, 2, actual.Succeed)
 	assert.EqualValues(t, 2, actual.Total)
 	assert.EqualValues(t, 0, actual.Failed)
-
-	assert.Len(t, actual.IPs, 2)
-	assert.Equal(t, actual.IPs[0].IP, auth1.IP)
-	assert.EqualValues(t, actual.IPs[0].Total, 1)
-	assert.Equal(t, actual.IPs[1].IP, auth2.IP)
-	assert.EqualValues(t, actual.IPs[1].Total, 1)
 }
