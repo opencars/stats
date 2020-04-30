@@ -51,10 +51,10 @@ func (r *AuthRepository) StatsForPeriod(from, to time.Time) ([]model.AuthStat, e
 	stats := make([]model.AuthStat, 0)
 
 	err := r.store.db.Select(&stats,
-		`SELECT token, name, count(*) as amount 
-		FROM authorizations 
+		`SELECT token, name, count(*) as amount
+		FROM authorizations
 		WHERE extract(epoch from timestamp) >= $1 AND
-			  extract(epoch from timestamp) <= $2 AND 
+			  extract(epoch from timestamp) <= $2 AND
 			  token is not NULL
 		GROUP BY token, name
 		ORDER BY count(*) DESC`,
@@ -77,7 +77,7 @@ func (r *AuthRepository) StatsByToken(token string) (*model.TokenStat, error) {
 	}
 
 	err = tx.Get(&stat,
-		`SELECT count(*) as failed FROM authorizations 
+		`SELECT count(*) as failed FROM authorizations
 		WHERE token = $1 AND status = 'failed'`,
 		token,
 	)
@@ -108,13 +108,66 @@ func (r *AuthRepository) StatsByToken(token string) (*model.TokenStat, error) {
 		return nil, err
 	}
 
-	stat.IPs = make([]model.StatsByIp, 0)
-	err = tx.Select(&stat.IPs,
-		`SELECT ip, count(*) as total FROM authorizations
-		WHERE token = $1
-		GROUP BY ip
-		ORDER BY count(*) DESC`,
-		token,
+	// stat.IPs = make([]model.StatsByIp, 0)
+	// err = tx.Select(&stat.IPs,
+	// 	`SELECT ip, count(*) as total FROM authorizations
+	// 	WHERE token = $1
+	// 	GROUP BY ip
+	// 	ORDER BY count(*) DESC`,
+	// 	token,
+	// )
+
+	// if err != nil {
+	// 	_ = tx.Rollback()
+	// 	return nil, err
+	// }
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return &stat, nil
+}
+
+func (r *AuthRepository) StatsByTokenPeriod(from, to time.Time, token string) (*model.TokenStat, error) {
+	var stat model.TokenStat
+
+	tx, err := r.store.db.BeginTxx(context.Background(), &sql.TxOptions{ReadOnly: false})
+	if err != nil {
+		return nil, err
+	}
+
+	err = tx.Get(&stat,
+		`SELECT count(*) as failed FROM authorizations
+		WHERE extract(epoch from timestamp) >= $1 AND
+			  extract(epoch from timestamp) <= $2 AND
+			  token = $3 AND status = 'failed'`,
+		from.UTC().Unix(), to.UTC().Unix(), token,
+	)
+
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Get(&stat,
+		`SELECT count(*) as succeed FROM authorizations
+		WHERE extract(epoch from timestamp) >= $1 AND
+			  extract(epoch from timestamp) <= $2 AND
+			  token = $3 AND status = 'succeed'`,
+		from.UTC().Unix(), to.UTC().Unix(), token,
+	)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Get(&stat,
+		`SELECT count(*) as total FROM authorizations
+		WHERE extract(epoch from timestamp) >= $1 AND
+			  extract(epoch from timestamp) <= $2 AND
+			  token = $3`,
+		from.UTC().Unix(), to.UTC().Unix(), token,
 	)
 
 	if err != nil {

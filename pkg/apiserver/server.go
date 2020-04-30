@@ -1,12 +1,10 @@
 package apiserver
 
 import (
-	"database/sql"
 	"encoding/json"
+	"net/http"
 	"strconv"
 	"time"
-
-	"net/http"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -41,13 +39,37 @@ func newServer(store store.Store) *server {
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	origins := handlers.AllowedOrigins([]string{"*"})
 	methods := handlers.AllowedMethods([]string{"GET", "OPTIONS"})
-	headers := handlers.AllowedHeaders([]string{"X-Api-Key", "Api-Key"})
+	headers := handlers.AllowedHeaders([]string{"X-Api-Key"})
 
 	cors := handlers.CORS(origins, methods, headers)(s.router)
 	cors.ServeHTTP(w, r)
 }
 
-func (s *server) handleStatsForTimeInterval() handler.Handler {
+func (s *server) handleActivity() handler.Handler {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		var id string
+		if apiKey := r.Header.Get("X-Api-Key"); apiKey != "" {
+			id = apiKey
+		}
+
+		stats, err := s.store.Authorization().StatsByToken(id)
+		// if err == store.ErrRecordNotFound {
+		// return s.result(&auth, &InvalidToken)
+		// }
+
+		if err != nil {
+			return err
+		}
+
+		if err := json.NewEncoder(w).Encode(stats); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func (s *server) handleActivityPeriod() handler.Handler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		from, err := strconv.ParseInt(mux.Vars(r)["from"], 10, 64)
 		if err != nil {
@@ -61,54 +83,21 @@ func (s *server) handleStatsForTimeInterval() handler.Handler {
 			return err
 		}
 
-		activity, err := s.store.Authorization().StatsForPeriod(time.Unix(from, 0), time.Unix(to, 0))
-		if err != nil {
-			return err
+		var id string
+		if apiKey := r.Header.Get("X-Api-Key"); apiKey != "" {
+			id = apiKey
 		}
 
-		if err := json.NewEncoder(w).Encode(activity); err != nil {
-			return err
-		}
-
-		return nil
-	}
-}
-
-func (s *server) handleStatsForDuration() handler.Handler {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		relative, err := time.ParseDuration(mux.Vars(r)["duration"])
-		if err != nil {
-			return err
-		}
-
-		activity, err := s.store.Authorization().StatsForPeriod(time.Now().Add(-relative), time.Now().Add(time.Hour))
-		if err != nil {
-			// TODO: Return 400.
-			return err
-		}
-
-		if err := json.NewEncoder(w).Encode(activity); err != nil {
-			return err
-		}
-
-		return nil
-	}
-}
-
-func (s *server) handleActivityByToken() handler.Handler {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		token := mux.Vars(r)["token"]
-
-		activity, err := s.store.Authorization().StatsByToken(token)
-		if err == sql.ErrNoRows {
-			return handler.ErrNotFound
-		}
+		stats, err := s.store.Authorization().StatsByTokenPeriod(time.Unix(from, 0), time.Unix(to, 0), id)
+		// if err == store.ErrRecordNotFound {
+		// return s.result(&auth, &InvalidToken)
+		// }
 
 		if err != nil {
 			return err
 		}
 
-		if err := json.NewEncoder(w).Encode(activity); err != nil {
+		if err := json.NewEncoder(w).Encode(stats); err != nil {
 			return err
 		}
 

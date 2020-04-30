@@ -31,5 +31,4 @@ func main() {
 	if err := apiserver.Start(&conf.DB, ":8080"); err != nil {
 		log.Fatal(err)
 	}
-
 }

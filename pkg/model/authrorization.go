@@ -28,8 +28,8 @@ type StatsByIp struct {
 }
 
 type TokenStat struct {
-	Total   int64       `json:"total" db:"total"`
-	Succeed int64       `json:"succeed" db:"succeed"`
-	Failed  int64       `json:"failed" db:"failed"`
-	IPs     []StatsByIp `json:"ips" db:"ips"`
+	Total   int64 `json:"total" db:"total"`
+	Succeed int64 `json:"succeed" db:"succeed"`
+	Failed  int64 `json:"failed" db:"failed"`
+	// IPs     []StatsByIp `json:"ips" db:"ips"`
 }
