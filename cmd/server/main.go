@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/shal/statsd/pkg/apiserver"
+	"github.com/shal/statsd/pkg/store/sqlstore"
 
 	"github.com/shal/statsd/pkg/config"
 )
@@ -28,7 +29,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := apiserver.Start(&conf.DB, ":8080"); err != nil {
+	store, err := sqlstore.New(&conf.DB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := apiserver.Start(store, ":8080"); err != nil {
 		log.Fatal(err)
 	}
 }
