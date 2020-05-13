@@ -1,12 +1,9 @@
 # Statsd
 
-[godoc]: https://godoc.org/github.com/opencars/statsd
-[godoc-img]: https://godoc.org/github.com/opencars/statsd?status.svg
 [goreport]: https://goreportcard.com/report/github.com/opencars/statsd
 [goreport-img]: https://goreportcard.com/badge/github.com/opencars/statsd
 [version]: https://img.shields.io/github/v/tag/opencars/statsd?sort=semver
 
-[![Docs][godoc-img]][godoc]
 [![Go Report][goreport-img]][goreport]
 [![Version][version]][version]
 
