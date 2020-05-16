@@ -3,6 +3,10 @@ package handler
 var (
 	// ErrNotFound - not found.
 	ErrNotFound = NewError(404, "token.not_found")
+	// ErrInvalidTimestamp - timestamp is has invalid format.
+	ErrInvalidTimestamp = NewError(400, "timestamp.invalid_format")
+	// ErrApiKey - Api-Key is not set or invalid.
+	ErrApiKey = NewError(400, "apikey.required")
 )
 
 // Error represents a handler error. It provides methods for a HTTP status
