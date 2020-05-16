@@ -47,18 +47,14 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) handleActivity() handler.Handler {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		var id string
-		if apiKey := r.Header.Get("X-Api-Key"); apiKey != "" {
-			id = apiKey
+		apiKey := r.Header.Get("X-Api-Key")
+		if apiKey == "" {
+			return handler.ErrApiKey
 		}
 
-		stats, err := s.store.Authorization().StatsByToken(id)
-		// if err == store.ErrRecordNotFound {
-		// return s.result(&auth, &InvalidToken)
-		// }
-
+		stats, err := s.store.Authorization().StatsByToken(apiKey)
 		if err != nil {
-			return err
+			return handleErr(err)
 		}
 
 		if err := json.NewEncoder(w).Encode(stats); err != nil {
@@ -73,28 +69,23 @@ func (s *server) handleActivityPeriod() handler.Handler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		from, err := strconv.ParseInt(mux.Vars(r)["from"], 10, 64)
 		if err != nil {
-			// TODO: Return 400.
-			return err
+			return handler.ErrInvalidTimestamp
 		}
 
-		to, err := strconv.ParseInt(mux.Vars(r)["to"], 10, 64)
-		if err != nil {
-			// TODO: Return 400.
-			return err
-		}
-
-		var id string
-		if apiKey := r.Header.Get("X-Api-Key"); apiKey != "" {
-			id = apiKey
-		}
-
-		stats, err := s.store.Authorization().StatsByTokenPeriod(time.Unix(from, 0), time.Unix(to, 0), id)
-		// if err == store.ErrRecordNotFound {
-		// return s.result(&auth, &InvalidToken)
-		// }
-
+		to, err := to(r)
 		if err != nil {
 			return err
+		}
+
+		apiKey := r.Header.Get("X-Api-Key")
+		if apiKey == "" {
+			return handler.ErrApiKey
+		}
+
+		stats, err := s.store.Authorization().StatsByTokenPeriod(time.Unix(from, 0), time.Unix(to, 0), apiKey)
+
+		if err != nil {
+			return handleErr(err)
 		}
 
 		if err := json.NewEncoder(w).Encode(stats); err != nil {

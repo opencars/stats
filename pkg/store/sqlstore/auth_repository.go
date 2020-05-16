@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/opencars/edrmvs/pkg/store"
 	"github.com/shal/statsd/pkg/model"
 )
 
@@ -108,22 +109,12 @@ func (r *AuthRepository) StatsByToken(token string) (*model.TokenStat, error) {
 		return nil, err
 	}
 
-	// stat.IPs = make([]model.StatsByIp, 0)
-	// err = tx.Select(&stat.IPs,
-	// 	`SELECT ip, count(*) as total FROM authorizations
-	// 	WHERE token = $1
-	// 	GROUP BY ip
-	// 	ORDER BY count(*) DESC`,
-	// 	token,
-	// )
-
-	// if err != nil {
-	// 	_ = tx.Rollback()
-	// 	return nil, err
-	// }
-
 	if err := tx.Commit(); err != nil {
 		return nil, err
+	}
+
+	if stat.Total == 0 {
+		return nil, store.ErrRecordNotFound
 	}
 
 	return &stat, nil
@@ -177,6 +168,10 @@ func (r *AuthRepository) StatsByTokenPeriod(from, to time.Time, token string) (*
 
 	if err := tx.Commit(); err != nil {
 		return nil, err
+	}
+
+	if stat.Total == 0 {
+		return nil, store.ErrRecordNotFound
 	}
 
 	return &stat, nil
