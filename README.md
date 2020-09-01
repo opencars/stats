@@ -41,7 +41,7 @@ docker-compose up -Vd postgres
 Migrate the database
 
 ```sh
-migrate -source file://migrations -database postgres://postgres:@127.0.0.1:5432/stats_test\?sslmode=disable up
+migrate -source file://migrations -database postgres://postgres:password@127.0.0.1:5432/stats\?sslmode=disable up
 ```
 
 Build the project

@@ -24,6 +24,7 @@ type Database struct {
 	User     string `toml:"username"`
 	Password string `toml:"password"`
 	Database string `toml:"database"`
+	SSLMode  string `toml:"ssl_mode"`
 }
 
 func (api *EventAPI) Address() string {
