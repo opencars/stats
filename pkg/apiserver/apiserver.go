@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/shal/statsd/pkg/store"
+	"github.com/opencars/statsd/pkg/store"
 )
 
 // Start starts http server on the specified addr.

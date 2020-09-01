@@ -7,13 +7,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/shal/statsd/pkg/model"
-	"github.com/shal/statsd/pkg/store/sqlstore"
+	"github.com/opencars/statsd/pkg/model"
+	"github.com/opencars/statsd/pkg/store/sqlstore"
 
-	"github.com/shal/statsd/pkg/eventapi"
+	"github.com/opencars/statsd/pkg/eventapi"
 
 	"github.com/nats-io/nats.go"
-	"github.com/shal/statsd/pkg/config"
+
+	"github.com/opencars/statsd/pkg/config"
 )
 
 func main() {

@@ -7,7 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/opencars/edrmvs/pkg/store"
-	"github.com/shal/statsd/pkg/apiserver/handler"
+
+	"github.com/opencars/statsd/pkg/apiserver/handler"
 )
 
 func to(r *http.Request) (int64, error) {

@@ -3,7 +3,7 @@ package store
 import (
 	"time"
 
-	"github.com/shal/statsd/pkg/model"
+	"github.com/opencars/statsd/pkg/model"
 )
 
 type AuthRepository interface {

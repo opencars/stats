@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/shal/statsd/pkg/apiserver"
-	"github.com/shal/statsd/pkg/store/sqlstore"
+	"github.com/opencars/statsd/pkg/apiserver"
+	"github.com/opencars/statsd/pkg/store/sqlstore"
 
-	"github.com/shal/statsd/pkg/config"
+	"github.com/opencars/statsd/pkg/config"
 )
 
 func main() {

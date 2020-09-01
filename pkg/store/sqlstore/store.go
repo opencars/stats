@@ -5,8 +5,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/shal/statsd/pkg/config"
-	"github.com/shal/statsd/pkg/store"
+	"github.com/opencars/statsd/pkg/config"
+	"github.com/opencars/statsd/pkg/store"
 )
 
 // Store is an implementation of store.Store interface based on SQL.

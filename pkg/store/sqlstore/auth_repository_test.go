@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shal/statsd/pkg/model"
-	"github.com/shal/statsd/pkg/store/sqlstore"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/opencars/statsd/pkg/model"
+	"github.com/opencars/statsd/pkg/store/sqlstore"
 )
 
 func TestAuthRepository_Create(t *testing.T) {

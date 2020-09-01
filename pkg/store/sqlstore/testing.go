@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
-	"github.com/shal/statsd/pkg/config"
+
+	"github.com/opencars/statsd/pkg/config"
 )
 
 // TestDB returns special test connection and teardown function.

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/shal/statsd/pkg/config"
+	"github.com/opencars/statsd/pkg/config"
 )
 
 var (

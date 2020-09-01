@@ -9,8 +9,8 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
-	"github.com/shal/statsd/pkg/apiserver/handler"
-	"github.com/shal/statsd/pkg/store"
+	"github.com/opencars/statsd/pkg/apiserver/handler"
+	"github.com/opencars/statsd/pkg/store"
 )
 
 type TimePeriod string

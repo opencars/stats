@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/opencars/edrmvs/pkg/store"
-	"github.com/shal/statsd/pkg/model"
+
+	"github.com/opencars/statsd/pkg/model"
 )
 
 type AuthRepository struct {
