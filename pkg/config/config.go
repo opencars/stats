@@ -2,41 +2,47 @@ package config
 
 import (
 	"fmt"
-	"io"
+	"os"
 
-	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v2"
 )
 
 type Settings struct {
-	EventAPI EventAPI `toml:"event_api"`
-	DB       Database `toml:"database"`
+	EventAPI EventAPI `yaml:"event_api"`
+	DB       Database `yaml:"database"`
 }
 
 type EventAPI struct {
-	Enabled bool   `toml:"enabled"`
-	Host    string `toml:"host"`
-	Port    int    `toml:"port"`
+	Enabled bool   `yaml:"enabled"`
+	Host    string `yaml:"host"`
+	Port    int    `yaml:"port"`
 }
 
 type Database struct {
-	Host     string `toml:"host"`
-	Port     int    `toml:"port"`
-	User     string `toml:"username"`
-	Password string `toml:"password"`
-	Database string `toml:"database"`
-	SSLMode  string `toml:"ssl_mode"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"username"`
+	Password string `yaml:"password"`
+	Database string `yaml:"database"`
+	SSLMode  string `yaml:"ssl_mode"`
 }
 
 func (api *EventAPI) Address() string {
 	return fmt.Sprintf("nats://%s:%d", api.Host, api.Port)
 }
 
-func New(r io.Reader) (*Settings, error) {
-	var conf Settings
+// New reads application configuration from specified file path.
+func New(path string) (*Settings, error) {
+	var config Settings
 
-	if _, err := toml.DecodeReader(r, &conf); err != nil {
+	f, err := os.Open(path)
+	if err != nil {
 		return nil, err
 	}
 
-	return &conf, nil
+	if err := yaml.NewDecoder(f).Decode(&config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }

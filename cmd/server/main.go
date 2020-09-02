@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"os"
 
 	"github.com/opencars/statsd/pkg/apiserver"
 	"github.com/opencars/statsd/pkg/store/sqlstore"
@@ -14,17 +13,11 @@ import (
 func main() {
 	var path string
 
-	flag.StringVar(&path, "config", "./config/config.toml", "Path to the configuration file")
+	flag.StringVar(&path, "config", "./config/config.yaml", "Path to the configuration file")
 
 	flag.Parse()
 
-	// Get configuration.
-	f, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	conf, err := config.New(f)
+	conf, err := config.New(path)
 	if err != nil {
 		log.Fatal(err)
 	}
