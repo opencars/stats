@@ -5,9 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/opencars/edrmvs/pkg/store"
-
 	"github.com/opencars/statsd/pkg/model"
+	"github.com/opencars/statsd/pkg/store"
 )
 
 type AuthRepository struct {

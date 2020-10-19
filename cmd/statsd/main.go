@@ -6,14 +6,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/opencars/statsd/pkg/model"
-	"github.com/opencars/statsd/pkg/store/sqlstore"
-
-	"github.com/opencars/statsd/pkg/eventapi"
-
 	"github.com/nats-io/nats.go"
 
 	"github.com/opencars/statsd/pkg/config"
+	"github.com/opencars/statsd/pkg/eventapi"
+	"github.com/opencars/statsd/pkg/model"
+	"github.com/opencars/statsd/pkg/store/sqlstore"
 )
 
 func main() {

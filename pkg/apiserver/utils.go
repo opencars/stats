@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/opencars/edrmvs/pkg/store"
 
 	"github.com/opencars/statsd/pkg/apiserver/handler"
+	"github.com/opencars/statsd/pkg/store"
 )
 
 func to(r *http.Request) (int64, error) {

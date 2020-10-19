@@ -1,0 +1,1 @@
+ALTER TABLE "authorizations" ALTER COLUMN "name" SET NOT NULL;
