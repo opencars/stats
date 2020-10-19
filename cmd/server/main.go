@@ -5,9 +5,8 @@ import (
 	"log"
 
 	"github.com/opencars/statsd/pkg/apiserver"
-	"github.com/opencars/statsd/pkg/store/sqlstore"
-
 	"github.com/opencars/statsd/pkg/config"
+	"github.com/opencars/statsd/pkg/store/sqlstore"
 )
 
 func main() {
